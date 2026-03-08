@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>林紫焱 生日快乐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "Microsoft YaHei", monospace;
+            padding: 20px;
+        }
+        /* 播放提示文字 - 醒目且不遮挡核心内容 */
+        .play-hint {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 240, 210, 0.95);
+            color: #e63946;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 9;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        /* 音量控制按钮 - 悬浮显示，不影响美观 */
+        .audio-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e63946;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+        .audio-control:hover {
+            opacity: 1;
+        }
+        /* 生日图片容器 - 大尺寸+动态效果 */
+        #birthdayImgWrap {
+            margin-bottom: 25px;
+            animation: birthdayFloat 5s ease-in-out infinite;
+            max-width: 90vw; /* 占屏幕90%宽度，保证大尺寸 */
+            cursor: pointer;
+            filter: drop-shadow(0 0 15px rgba(255, 223, 107, 0.6)); /* 暖光光晕 */
+        }
+        #birthdayImg {
+            width: 100%;
+            max-width: 550px; /* 最大宽度，避免变形 */
+            height: auto;
+            border-radius: 20px;
+        }
+        .wish {
+            color: #e63946;
+            font-size: clamp(20px, 6vw, 34px);
+            text-align: center;
+            line-height: 2;
+            opacity: 0;
+            animation: fadeIn 2s ease-in-out 1s forwards;
+        }
+        .wish span {
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        /* 图片专属动态 */
+        @keyframes birthdayFloat {
+            0% { 
+                transform: translateY(0px) rotate(0deg) scale(1); 
+                filter: brightness(1) drop-shadow(0 0 15px rgba(255, 223, 107, 0.6));
+            }
+            50% { 
+                transform: translateY(-18px) rotate(1deg) scale(1.04); 
+                filter: brightness(1.08) drop-shadow(0 0 25px rgba(255, 223, 107, 0.8));
+            }
+            100% { 
+                transform: translateY(0px) rotate(0deg) scale(1); 
+                filter: brightness(1) drop-shadow(0 0 15px rgba(255, 223, 107, 0.6));
+            }
+        }
+        /* 文字淡入动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 点击文字闪烁动画 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: pulse 0.8s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 新增：播放提示文字 -->
+    <div class="play-hint">🎵 点击图片播放生日音乐 🎵</div>
+    
+    <!-- 音量控制按钮 -->
+    <button class="audio-control" id="audioBtn">🔊</button>
+    
+    <!-- 背景音乐（自动播放+循环+静音初始化） -->
+    <audio id="birthdayMusic" loop>
+        <!-- 生日祝福纯音乐链接（无版权，可直接用） -->
+        <source src="https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3" type="audio/mpeg">
+        你的浏览器不支持音频播放
+    </audio>
+
+    <!-- 生日插画 -->
+    <div id="birthdayImgWrap">
+        <img id="birthdayImg" src="https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/987176ea15de40f7bd69497d54640984.jpg~tplv-a9rns2rl98-24:720:720.image?lk3s=8e244e95&rcl=20260308134420A54875D81B4E9FCAAE5E&rrcfp=8a172a1a&x-expires=1773553460&x-signature=34O%2FZe3jAc3k0JCvlX69QeAoTl0%3D" alt="生日祝福插画">
+    </div>
+    
+    <div class="wish">
+        林紫焱<br>
+        生日快乐！🎂
+    </div>
+
+    <script>
+        // 音频相关元素
+        const audio = document.getElementById('birthdayMusic');
+        const audioBtn = document.getElementById('audioBtn');
+        const playHint = document.querySelector('.play-hint'); // 新增：提示元素
+        let isMuted = true; // 初始静音（避免浏览器禁止自动播放）
+        let isPlayed = false; // 新增：标记音乐是否已播放
+
+        // 图片和文字元素
+        const imgWrap = document.getElementById('birthdayImgWrap');
+        const wishText = document.querySelector('.wish');
+
+        // 初始化音频（解决浏览器自动播放限制）
+        function initAudio() {
+            // 尝试自动播放，失败则绑定点击播放
+            audio.muted = isMuted;
+            audio.play().catch(() => {
+                // 点击页面任意位置触发播放
+                document.addEventListener('click', () => {
+                    audio.play();
+                }, { once: true });
+            });
+        }
+
+        // 音量控制按钮逻辑
+        audioBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            audio.muted = isMuted;
+            audioBtn.textContent = isMuted ? '🔇' : '🔊';
+            // 点击音量按钮时也触发播放
+            if (!isPlayed) {
+                audio.play();
+                isPlayed = true;
+                playHint.textContent = "🎵 生日音乐播放中 🎵"; // 提示更新
+            }
+        });
+
+        // 点击图片触发文字闪烁 + 播放音乐 + 更新提示
+        imgWrap.addEventListener('click', () => {
+            // 播放音乐并标记状态
+            if (!isPlayed) {
+                audio.play();
+                isPlayed = true;
+                playHint.textContent = "🎵 生日音乐播放中 🎵"; // 提示更新
+            }
+            // 取消静音
+            if (isMuted) {
+                isMuted = false;
+                audio.muted = false;
+                audioBtn.textContent = '🔊';
+            }
+            // 文字闪烁
+            wishText.innerHTML = wishText.textContent.split('').map(char => `<span>${char}</span>`).join('');
+            const newSpans = wishText.querySelectorAll('span');
+            newSpans.forEach((span, i) => {
+                setTimeout(() => {
+                    span.classList.add('pulse');
+                    setTimeout(() => span.classList.remove('pulse'), 800);
+                }, i * 100);
+            });
+        });
+
+        // 页面加载完成初始化
+        window.addEventListener('load', () => {
+            initAudio();
+        });
+    </script>
+</body>
+</html>
